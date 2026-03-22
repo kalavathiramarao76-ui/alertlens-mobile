@@ -6,7 +6,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   
-  static const int maxFreeUses = 5;
+  static const int maxFreeUses = 3;
   static const String _usageKey = 'usage_count';
   
   User? get currentUser => _auth.currentUser;
