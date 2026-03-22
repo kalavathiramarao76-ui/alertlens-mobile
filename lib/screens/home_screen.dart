@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/favorites_provider.dart';
+import '../widgets/auth_wall.dart';
+import '../services/auth_service.dart';
 import 'analyze_screen.dart';
 import 'runbooks_screen.dart';
 import 'correlate_screen.dart';
@@ -10,8 +12,27 @@ import 'severity_screen.dart';
 import 'favorites_screen.dart';
 import 'settings_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final AuthService _authService = AuthService();
+  bool _showAuthWall = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final needsAuth = await _authService.needsAuth();
+    if (mounted) setState(() => _showAuthWall = needsAuth);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +75,9 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,6 +219,13 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
+          if (_showAuthWall)
+            AuthWall(
+              authService: _authService,
+              onSignedIn: () => setState(() => _showAuthWall = false),
+            ),
+        ],
+      ),
     );
   }
 
@@ -205,7 +235,7 @@ class HomeScreen extends StatelessWidget {
         color: AppColors.border,
         margin: const EdgeInsets.symmetric(horizontal: 4),
       );
-}
+}  // end _HomeScreenState
 
 class _StatItem extends StatelessWidget {
   final String label;
